@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://lfptl0b0umru"]
+
+[sub_resource type="PrismMesh" id="PrismMesh_x4uf2"]
+
+[node name="tent" type="MeshInstance3D"]
+transform = Transform3D(14.3946, 0, 6.94257, 0, 20, 0, -13.8851, 0, 7.19728, 0, 0, 0)
+mesh = SubResource("PrismMesh_x4uf2")

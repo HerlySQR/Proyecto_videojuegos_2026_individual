@@ -1,0 +1,74 @@
+[gd_scene load_steps=12 format=3 uid="uid://cd2cb5xrjrm0l"]
+
+[ext_resource type="Texture2D" uid="uid://ss2644qx04te" path="res://src/assets/grass.png" id="1_t1eg8"]
+[ext_resource type="PackedScene" uid="uid://jew35xhce8wq" path="res://src/scenes/rts_player.tscn" id="1_vxdti"]
+[ext_resource type="PackedScene" uid="uid://ch53k40p6oeyx" path="res://src/scenes/BasicUnit01.tscn" id="2_q62e0"]
+[ext_resource type="PackedScene" uid="uid://dbqjasiuucox" path="res://src/scenes/rts_camera.tscn" id="3_x4uf2"]
+[ext_resource type="PackedScene" uid="uid://lfptl0b0umru" path="res://src/scenes/tent.tscn" id="5_q62e0"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q62e0"]
+albedo_texture = ExtResource("1_t1eg8")
+uv1_scale = Vector3(6, 6, 6)
+texture_filter = 4
+
+[sub_resource type="BoxMesh" id="BoxMesh_xwo6f"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_xwo6f"]
+points = PackedVector3Array(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tabwl"]
+
+[sub_resource type="Sky" id="Sky_r122g"]
+sky_material = SubResource("ProceduralSkyMaterial_tabwl")
+
+[sub_resource type="Environment" id="Environment_x4uf2"]
+background_mode = 2
+sky = SubResource("Sky_r122g")
+
+[node name="Mundo" type="Node3D"]
+
+[node name="RTSPlayer" parent="." instance=ExtResource("1_vxdti")]
+
+[node name="Units" type="Node" parent="."]
+
+[node name="BasicUnit01_01" parent="Units" instance=ExtResource("2_q62e0")]
+
+[node name="BasicUnit01_02" parent="Units" instance=ExtResource("2_q62e0")]
+transform = Transform3D(0.0836952, 0, 0.996491, 0, 1, 0, -0.996491, 0, 0.0836952, 5.091, 0, 3.767)
+skeleton = NodePath("../BasicUnit01_01")
+
+[node name="BasicUnit01_03" parent="Units" instance=ExtResource("2_q62e0")]
+transform = Transform3D(0.021623, 0, -0.999766, 0, 1, 0, 0.999766, 0, 0.021623, -6.644, 0, 0.632)
+skeleton = NodePath("../BasicUnit01_02")
+
+[node name="Buildings" type="Node" parent="."]
+
+[node name="tent" parent="Buildings" instance=ExtResource("5_q62e0")]
+transform = Transform3D(14.3946, 0, 6.94257, 0, 20, 0, -13.8851, 0, 7.19728, -2.25357, 1.72123, 29.7374)
+skeleton = NodePath("../..")
+
+[node name="tent2" parent="Buildings" instance=ExtResource("5_q62e0")]
+transform = Transform3D(13.9834, 0, 0.910313, 0, 11.8532, 0, -1.794, 0, 7.09529, 20.9506, 5.32101, -23.7284)
+skeleton = NodePath("../..")
+
+[node name="tent3" parent="Buildings" instance=ExtResource("5_q62e0")]
+transform = Transform3D(5.81439, 0, 6.6507, 0, 9.82201, 0, -25.4765, 0, 1.51784, 40.618, 4.97677, 4.24772)
+skeleton = NodePath("../..")
+
+[node name="Grass" type="MeshInstance3D" parent="."]
+transform = Transform3D(250, 0, 0, 0, 0.105, 0, 0, 0, 250, 0, -0.105, 0)
+material_override = SubResource("StandardMaterial3D_q62e0")
+mesh = SubResource("BoxMesh_xwo6f")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Grass"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Grass/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_xwo6f")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_x4uf2")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.993044, 0.117745, 0, 0.00447686, -0.037757, 0.999277, 0.11766, -0.992326, -0.0380215, 0, 0, 0)
+
+[node name="RTSCamera" parent="." instance=ExtResource("3_x4uf2")]

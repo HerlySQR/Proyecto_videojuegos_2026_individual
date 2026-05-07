@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=3 uid="uid://bai6vsn8a0g3w"]
+
+[ext_resource type="Script" uid="uid://7ogyglyyfm1p" path="res://src/scripts/basic_enemy.gd" id="1_5v1d1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_13c8m"]
+albedo_color = Color(0.947272, 0, 0.275048, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_5v1d1"]
+material = SubResource("StandardMaterial3D_13c8m")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_oso1w"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_5v1d1"]
+radius = 2.50293
+
+[node name="CharacterBody3D" type="CharacterBody3D"]
+script = ExtResource("1_5v1d1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_5v1d1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_oso1w")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("CylinderShape3D_5v1d1")
+
+[connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]
+[connection signal="body_exited" from="Area3D" to="." method="_on_area_3d_body_exited"]
