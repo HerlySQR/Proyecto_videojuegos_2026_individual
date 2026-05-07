@@ -1,12 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://ch53k40p6oeyx"]
+[gd_scene load_steps=7 format=3 uid="uid://ch53k40p6oeyx"]
 
 [ext_resource type="Script" uid="uid://bgwjio5yp3yqi" path="res://src/scripts/basic_unit_01.gd" id="1_g523l"]
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_iqho3"]
-radial_segments = 4
-rings = 0
-
-[sub_resource type="PrismMesh" id="PrismMesh_g523l"]
+[ext_resource type="ArrayMesh" uid="uid://d27rp2opwyq32" path="res://src/custom_mesh/new_array_mesh.tres" id="1_ub5t4"]
 
 [sub_resource type="Gradient" id="Gradient_ub5t4"]
 offsets = PackedFloat32Array(0.587302, 0.674603, 0.746032)
@@ -19,20 +14,25 @@ height = 96
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g523l"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 1, 1, 0.541176)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ub5t4"]
+size = Vector3(0.5, 0.5, 0.5)
+
 [node name="BasicUnit01" type="MeshInstance3D"]
+mesh = ExtResource("1_ub5t4")
 script = ExtResource("1_g523l")
-
-[node name="CSGMesh3D" type="CSGMesh3D" parent="."]
-
-[node name="Body" type="CSGMesh3D" parent="CSGMesh3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05852, 0)
-mesh = SubResource("CapsuleMesh_iqho3")
-
-[node name="Direction" type="CSGMesh3D" parent="CSGMesh3D/Body"]
-transform = Transform3D(1, -4.37114e-08, -8.3083e-09, 4.37114e-08, -4.37114e-08, 0.190072, -4.37114e-08, -1, -8.3083e-09, 0.0194603, -0.976739, -1.09195)
-mesh = SubResource("PrismMesh_g523l")
 
 [node name="CircleSelection" type="Sprite3D" parent="."]
 pixel_size = 0.02
 axis = 1
 texture = SubResource("GradientTexture2D_os8ek")
+
+[node name="SelectionAABB" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.13402, -0.00251335)
+top_level = true
+material_override = SubResource("StandardMaterial3D_g523l")
+mesh = SubResource("BoxMesh_ub5t4")

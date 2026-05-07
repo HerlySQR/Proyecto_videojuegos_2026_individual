@@ -13,13 +13,19 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	pass
 	
-func dragbox_select_object(object_list: Array, dragbox_select: Rect2) -> void:
+func select_obj_by_aabb(obj: MeshInstance3D, mouse_pos: Vector2, camera: Camera3D) -> bool:
+	var obj_AABB: AABB = obj.global_transform * obj.mesh.get_aabb()
+	if obj_AABB.intersects_ray(camera.project_ray_origin(mouse_pos), camera.project_ray_normal(mouse_pos)):
+		return true
+	return false
+
+func dragbox_select_object(object_list: Array, dragbox_select: Rect2) -> Array[Node3D]:
+	var selected_list: Array[Node3D] = []
 	for object: Node3D in (object_list as Array[Node3D]):
 		var position_in_2d: Vector2 = get_viewport().get_camera_3d().unproject_position(object.global_position)
 		if dragbox_select.has_point(position_in_2d):
-			_select_object(object)
-		else:
-			_unselect_object(object)
+			selected_list.append(object)
+	return selected_list
 
 func update_selection_rectangle(new_rect: Rect2) -> void:
 	new_rect = new_rect.abs()
@@ -40,3 +46,11 @@ func _unselect_object(object: Node) -> void:
 
 func _toggle_select_object(object: Node) -> void:
 	object.selected = !object.selected
+
+func select_array(array: Array[Node3D]) -> void:
+	for obj in array:
+		_select_object(obj)
+
+func unselect_array(array: Array[Node3D]) -> void:
+	for obj in array:
+		_unselect_object(obj)
