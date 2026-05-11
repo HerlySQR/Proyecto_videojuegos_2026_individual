@@ -2,6 +2,7 @@ extends Node
 
 const TYPE_RTS_CAMERA: Script = preload("main.gd")
 const TYPE_SELECTION_MANAGER: Script = preload("selection_manager.gd")
+const UI_3D: Script = preload("ui_3d.gd")
 
 @onready var rts_camera: TYPE_RTS_CAMERA = $RTSCamera
 @onready var selection_manager: TYPE_SELECTION_MANAGER = $SelectionManager
@@ -37,10 +38,12 @@ func update__player_selection(new_obj_selection: Array[Node3D]) -> void:
 	selection_manager.select_array(_player_selection)
 
 func move_units_to_mouse() -> void:
-	var mouse_collision_on_map: Vector3 = get_mouse_position_collision_on_point_of_map()
-	if mouse_collision_on_map != Vector3.ZERO:
-		for object: Node3D in _player_selection:
-			object.new_path(mouse_collision_on_map)
+	if _player_selection.size() > 0:
+		var mouse_collision_on_map: Vector3 = get_mouse_position_collision_on_point_of_map()
+		if mouse_collision_on_map != Vector3.ZERO:
+			for object: Node3D in _player_selection:
+				object.new_path(mouse_collision_on_map)
+		UI_3D.create_expanding_circle(self, mouse_collision_on_map)
 
 func selection_dragbox() -> void:
 	if Input.is_action_pressed(&"input_action_mouseclick_left"):

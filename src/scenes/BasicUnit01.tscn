@@ -4,8 +4,8 @@
 [ext_resource type="ArrayMesh" uid="uid://d27rp2opwyq32" path="res://src/custom_mesh/new_array_mesh.tres" id="1_ub5t4"]
 
 [sub_resource type="Gradient" id="Gradient_ub5t4"]
-offsets = PackedFloat32Array(0.587302, 0.674603, 0.746032)
-colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0)
+offsets = PackedFloat32Array(0.4, 0.474074, 0.622222, 0.77037)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_os8ek"]
 gradient = SubResource("Gradient_ub5t4")

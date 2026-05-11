@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://5oq6oh5coeb0"]
+
+[ext_resource type="ArrayMesh" uid="uid://c5ccbevck36pt" path="res://src/custom_mesh/wood_tree.tres" id="1_3u76j"]
+
+[node name="WoodTree" type="MeshInstance3D"]
+mesh = ExtResource("1_3u76j")
