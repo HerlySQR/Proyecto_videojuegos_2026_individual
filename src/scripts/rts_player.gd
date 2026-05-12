@@ -24,9 +24,11 @@ func get_mouse_position_collision_on_point_of_map() -> Vector3:
 	var mouse_position: Vector2 = get_viewport().get_mouse_position()
 	var camera: Camera3D = get_viewport().get_camera_3d()
 	var ray_normal: Vector3 = camera.project_ray_normal(mouse_position)
+	
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
 	query.from = camera.global_position
-	query.to = ray_normal * 1_000
+	query.to = camera.global_position + ray_normal * camera.far
+	
 	var collision_ray: Dictionary = camera.get_world_3d().direct_space_state.intersect_ray(query)
 	if collision_ray.size():
 		return collision_ray.position
