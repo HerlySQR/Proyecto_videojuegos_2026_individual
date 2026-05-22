@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 const MOVE_SPEED: float = 12.0
+const LERP_VALUE: float = 0.15
 
 enum State {
 	IDLE,
@@ -13,9 +14,11 @@ var new_path_goal: Vector3 = Vector3.ZERO
 
 @onready var circle_selection: Sprite3D = $CircleSelection
 @onready var obj_selection_aabb: MeshInstance3D = $SelectionAABB
-@onready var body: MeshInstance3D = $Body
+@onready var body: MeshInstance3D = $Armature/Skeleton3D/body
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var navigation_agent: NavigationAgent3D = $NavigationAgent3D
+@onready var armature: Node3D = $Armature
+@onready var animation_tree: AnimationTree = $AnimationTree
 
 var selected: bool = false:
 	set(new_value):
@@ -42,6 +45,9 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if !navigation_agent.is_navigation_finished():
 		follow_path(delta)
+	else:
+		animation_tree.set("parameters/BlendSpace1D/blend_position", 0)
+		
 
 func follow_path(delta: float) -> void:
 	var target_pos = navigation_agent.get_next_path_position()
@@ -50,6 +56,8 @@ func follow_path(delta: float) -> void:
 	
 	velocity = direction * MOVE_SPEED
 	move_and_slide()
+	
+	animation_tree.set("parameters/BlendSpace1D/blend_position", velocity.length() / MOVE_SPEED)
 
 func face_direction(direction: Vector3) -> void:
 	look_at(Vector3(direction.x, global_position.y, direction.z), Vector3.UP)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://ch53k40p6oeyx"]
+[gd_scene load_steps=9 format=3 uid="uid://ch53k40p6oeyx"]
 
 [ext_resource type="Script" uid="uid://bgwjio5yp3yqi" path="res://src/scripts/basic_unit_01.gd" id="1_g523l"]
 [ext_resource type="ArrayMesh" uid="uid://d27rp2opwyq32" path="res://src/custom_mesh/new_array_mesh.tres" id="1_ub5t4"]
@@ -22,9 +22,28 @@ albedo_color = Color(0, 1, 1, 0.541176)
 [sub_resource type="BoxMesh" id="BoxMesh_ub5t4"]
 size = Vector3(0.5, 0.5, 0.5)
 
-[node name="BasicUnit01" type="MeshInstance3D"]
-mesh = ExtResource("1_ub5t4")
+[sub_resource type="BoxShape3D" id="BoxShape3D_ub5t4"]
+
+[sub_resource type="GDScript" id="GDScript_ub5t4"]
+script/source = "extends CollisionShape3D
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+"
+
+[node name="BasicUnit01" type="CharacterBody3D"]
 script = ExtResource("1_g523l")
+
+[node name="Body" type="MeshInstance3D" parent="." groups=["RTSMap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = ExtResource("1_ub5t4")
 
 [node name="CircleSelection" type="Sprite3D" parent="."]
 pixel_size = 0.02
@@ -36,3 +55,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.13402, -0.00251335)
 top_level = true
 material_override = SubResource("StandardMaterial3D_g523l")
 mesh = SubResource("BoxMesh_ub5t4")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_ub5t4")
+script = SubResource("GDScript_ub5t4")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.1
+target_desired_distance = 0.1

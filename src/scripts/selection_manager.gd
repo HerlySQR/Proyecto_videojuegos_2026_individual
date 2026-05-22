@@ -8,13 +8,12 @@ const DRAGBOX_MIN_AREA: int = 4 # Area values
 func _ready() -> void:
 	ui_dragbox.hide()
 
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
 	
-func select_obj_by_aabb(obj: MeshInstance3D, mouse_pos: Vector2, camera: Camera3D) -> bool:
-	var obj_AABB: AABB = obj.global_transform * obj.mesh.get_aabb()
+func select_obj_by_aabb(obj: CharacterBody3D, mouse_pos: Vector2, camera: Camera3D) -> bool:
+	var obj_AABB: AABB = obj.global_transform * obj.body.mesh.get_aabb()
 	if obj_AABB.intersects_ray(camera.project_ray_origin(mouse_pos), camera.project_ray_normal(mouse_pos)):
 		return true
 	return false
