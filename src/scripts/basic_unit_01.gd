@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+
+signal death
 const MOVE_SPEED: float = 12.0
 
 enum State {

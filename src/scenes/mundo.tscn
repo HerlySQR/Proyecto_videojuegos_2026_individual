@@ -1,7 +1,8 @@
-[gd_scene load_steps=16 format=3 uid="uid://cd2cb5xrjrm0l"]
+[gd_scene load_steps=17 format=3 uid="uid://cd2cb5xrjrm0l"]
 
 [ext_resource type="Texture2D" uid="uid://ss2644qx04te" path="res://src/assets/grass.png" id="1_t1eg8"]
 [ext_resource type="PackedScene" uid="uid://jew35xhce8wq" path="res://src/scenes/rts_player.tscn" id="1_vxdti"]
+[ext_resource type="Script" uid="uid://duhyd4swqk5eh" path="res://src/scripts/units.gd" id="2_gqjsr"]
 [ext_resource type="PackedScene" uid="uid://ch53k40p6oeyx" path="res://src/scenes/BasicUnit01.tscn" id="2_q62e0"]
 [ext_resource type="PackedScene" uid="uid://dbqjasiuucox" path="res://src/scenes/rts_camera.tscn" id="3_x4uf2"]
 [ext_resource type="PackedScene" uid="uid://b12ip5w4gg7p6" path="res://src/scenes/pruebaBlender.tscn" id="3_xc8s1"]
@@ -49,6 +50,7 @@ navigation_mesh = SubResource("NavigationMesh_q62e0")
 shape = SubResource("BoxShape3D_vxdti")
 
 [node name="Units" type="Node" parent="."]
+script = ExtResource("2_gqjsr")
 
 [node name="BasicUnit01_01" parent="Units" instance=ExtResource("2_q62e0")]
 
@@ -59,7 +61,10 @@ transform = Transform3D(0.0836952, 0, 0.996491, 0, 1, 0, -0.996491, 0, 0.0836952
 transform = Transform3D(0.021623, 0, -0.999766, 0, 1, 0, 0.999766, 0, 0.021623, -6.644, 0, 0.632)
 
 [node name="pruebaBlender" parent="Units" instance=ExtResource("3_xc8s1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.1484, 0.0500009, 2.45224)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.2847, 0.0500009, 2.33598)
+
+[node name="pruebaBlender2" parent="Units" instance=ExtResource("3_xc8s1")]
+transform = Transform3D(-0.82711, 0, 0.56204, 0, 1, 0, -0.56204, 0, -0.82711, 13.1928, 0.0500004, -0.541173)
 
 [node name="Buildings" type="Node" parent="."]
 
@@ -148,3 +153,6 @@ environment = SubResource("Environment_x4uf2")
 transform = Transform3D(0.993044, 0.117745, 0, 0.00447686, -0.037757, 0.999277, 0.11766, -0.992326, -0.0380215, 0, 0, 0)
 
 [node name="RTSCamera" parent="." instance=ExtResource("3_x4uf2")]
+
+[connection signal="child_entered_tree" from="Units" to="Units" method="_on_child_entered_tree"]
+[connection signal="unit_death" from="Units" to="RTSPlayer" method="_on_units_unit_death"]

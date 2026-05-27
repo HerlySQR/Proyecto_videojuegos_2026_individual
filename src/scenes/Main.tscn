@@ -1,15 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://bnqatdfrmnxm8"]
 
 [ext_resource type="Script" uid="uid://jistgnae5ys0" path="res://src/scripts/main.gd" id="1_8oy5r"]
-[ext_resource type="PackedScene" uid="uid://cd2cb5xrjrm0l" path="res://src/scenes/mundo.tscn" id="1_x4os5"]
+[ext_resource type="PackedScene" uid="uid://jx5smkxy1mxd" path="res://src/scenes/menu.tscn" id="2_akft7"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_8oy5r")
 
-[node name="UI" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Mundo" parent="." instance=ExtResource("1_x4os5")]
+[node name="Menu" parent="." instance=ExtResource("2_akft7")]

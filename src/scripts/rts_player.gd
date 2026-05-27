@@ -73,3 +73,9 @@ func selection_dragbox() -> void:
 	if Input.is_action_just_released(&"input_action_mouseclick_right"):
 		if _player_selection.size() >= 0:
 			move_units_to_mouse()
+
+func _on_units_unit_death(unit: CharacterBody3D) -> void:
+	for i in range(_player_selection.size()):
+		if _player_selection[i] == unit:
+			_player_selection.remove_at(i)
+			break
