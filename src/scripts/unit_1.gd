@@ -19,6 +19,19 @@ var new_path_goal: Vector3 = Vector3.ZERO
 var current_target: CharacterBody3D = null
 var health: float = 100.
 var damage: float = 10.
+var color: Color = Color.RED:
+	set(new_color):
+		if _material == null:
+			_material = StandardMaterial3D.new()
+			_material.vertex_color_use_as_albedo = true
+			body.material_override = _material
+		
+		color = new_color
+		_material.albedo_color = new_color
+	get():
+		return color
+
+var _material: StandardMaterial3D
 
 @onready var circle_selection: Sprite3D = $CircleSelection
 @onready var obj_selection_aabb: MeshInstance3D = $SelectionAABB

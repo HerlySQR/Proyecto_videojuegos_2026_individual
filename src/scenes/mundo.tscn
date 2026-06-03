@@ -1,7 +1,8 @@
-[gd_scene load_steps=15 format=3 uid="uid://cd2cb5xrjrm0l"]
+[gd_scene load_steps=16 format=3 uid="uid://cd2cb5xrjrm0l"]
 
 [ext_resource type="Texture2D" uid="uid://ss2644qx04te" path="res://src/assets/grass.png" id="1_t1eg8"]
 [ext_resource type="PackedScene" uid="uid://jew35xhce8wq" path="res://src/scenes/rts_player.tscn" id="1_vxdti"]
+[ext_resource type="Script" uid="uid://ckacv2nasvsru" path="res://src/scenes/mundo.gd" id="1_xc8s1"]
 [ext_resource type="Script" uid="uid://duhyd4swqk5eh" path="res://src/scripts/units.gd" id="2_gqjsr"]
 [ext_resource type="PackedScene" uid="uid://dbqjasiuucox" path="res://src/scenes/rts_camera.tscn" id="3_x4uf2"]
 [ext_resource type="PackedScene" uid="uid://b12ip5w4gg7p6" path="res://src/scenes/unit_red.tscn" id="3_xc8s1"]
@@ -36,6 +37,7 @@ background_mode = 2
 sky = SubResource("Sky_r122g")
 
 [node name="Mundo" type="Node3D"]
+script = ExtResource("1_xc8s1")
 
 [node name="RTSPlayer" parent="." instance=ExtResource("1_vxdti")]
 
@@ -51,7 +53,10 @@ shape = SubResource("BoxShape3D_vxdti")
 script = ExtResource("2_gqjsr")
 
 [node name="Hero" parent="Units" instance=ExtResource("3_xc8s1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -110.146, 0.0500009, -102.018)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105.103, 0.0500009, -101.496)
+
+[node name="NPC_1" parent="Units" instance=ExtResource("3_xc8s1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.5879, 0.0500009, -98.2372)
 
 [node name="Buildings" type="Node" parent="."]
 

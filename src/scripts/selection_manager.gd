@@ -2,6 +2,7 @@ extends Node
 
 const DRAGBOX_MIN_AREA: int = 4 # Area values
 
+@onready var player: Node = $".."
 @onready var ui_dragbox: NinePatchRect = $NinePatchRect
 
 # Called when the node enters the scene tree for the first time.
@@ -13,6 +14,8 @@ func _process(delta: float) -> void:
 	pass
 	
 func select_obj_by_aabb(obj: CharacterBody3D, mouse_pos: Vector2, camera: Camera3D) -> bool:
+	if obj.player_owner != player:
+		return false
 	var obj_AABB: AABB = obj.global_transform * obj.body.mesh.get_aabb()
 	if obj_AABB.intersects_ray(camera.project_ray_origin(mouse_pos), camera.project_ray_normal(mouse_pos)):
 		return true
@@ -22,7 +25,7 @@ func dragbox_select_object(object_list: Array, dragbox_select: Rect2) -> Array[N
 	var selected_list: Array[Node3D] = []
 	for object: Node3D in (object_list as Array[Node3D]):
 		var position_in_2d: Vector2 = get_viewport().get_camera_3d().unproject_position(object.global_position)
-		if dragbox_select.has_point(position_in_2d):
+		if dragbox_select.has_point(position_in_2d) and object.player_owner == player:
 			selected_list.append(object)
 	return selected_list
 
