@@ -13,6 +13,7 @@ enum State {
 	ATTACK
 }
 
+var player_owner: Node = null
 var current_state: State = State.IDLE
 var new_path_goal: Vector3 = Vector3.ZERO
 var current_target: CharacterBody3D = null

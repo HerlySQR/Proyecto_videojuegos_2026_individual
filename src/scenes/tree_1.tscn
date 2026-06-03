@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://csvhaxya1qvfv"]
+
+[ext_resource type="PackedScene" uid="uid://b50lf0rrpkilq" path="res://src/assets/tree1.fbx" id="1_g4ebt"]
+
+[node name="tree1" instance=ExtResource("1_g4ebt")]
+
+[node name="Trunk" parent="." index="1" groups=["RTSMap"]]

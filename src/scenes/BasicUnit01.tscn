@@ -41,7 +41,7 @@ func _process(delta: float) -> void:
 [node name="BasicUnit01" type="CharacterBody3D"]
 script = ExtResource("1_g523l")
 
-[node name="Body" type="MeshInstance3D" parent="." groups=["RTSMap"]]
+[node name="Body" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
 mesh = ExtResource("1_ub5t4")
 
