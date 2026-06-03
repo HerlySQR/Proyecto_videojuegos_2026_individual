@@ -58,6 +58,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105.103, 0.0500009, -101.496
 [node name="NPC_1" parent="Units" instance=ExtResource("3_xc8s1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.5879, 0.0500009, -98.2372)
 
+[node name="NPC_2" parent="Units" instance=ExtResource("3_xc8s1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -98.9802, 0.0500009, -94.8382)
+
+[node name="NPC_3" parent="Units" instance=ExtResource("3_xc8s1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.7439, 0.0500009, -93.1757)
+
 [node name="Buildings" type="Node" parent="."]
 
 [node name="Trees" type="Node" parent="."]

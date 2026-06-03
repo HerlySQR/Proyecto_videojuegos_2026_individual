@@ -86,7 +86,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 		var possible_targets: Array[Node3D] = []
 		for unit: Node3D in units.get_children():
-			if unit != self and unit.position.distance_squared_to(position) <= MELEE_RANGE_SQ:
+			if unit != self and unit.position.distance_squared_to(position) <= MELEE_RANGE_SQ and unit.player_owner != player_owner:
 				possible_targets.append(unit)
 		
 		current_target = possible_targets.pick_random()
@@ -146,4 +146,13 @@ func _startup() -> void:
 	collision_shape.position = aabb.position + aabb.size * 0.5
 	
 	obj_selection_aabb.queue_free()
-	
+
+# AI
+
+var hold_position: Vector3
+
+func startAI() -> void:
+	pass
+
+func runAI(delta: float) -> void:
+	pass
