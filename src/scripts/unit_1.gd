@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 signal death
+signal damaged(source: CharacterBody3D, amount: float)
 
 const MOVE_SPEED: float = 12.0
 const LERP_VALUE: float = 0.15
@@ -81,17 +82,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if current_state != State.ATTACK and Input.is_action_just_pressed(&"Input_action_attack"):
-		stop_moving()
-		attacking = 30
-		
 		var possible_targets: Array[Node3D] = []
 		for unit: Node3D in units.get_children():
 			if unit != self and unit.position.distance_squared_to(position) <= MELEE_RANGE_SQ and unit.player_owner != player_owner:
 				possible_targets.append(unit)
 		
 		current_target = possible_targets.pick_random()
-		if current_target != null:
-			face_direction(current_target.position)
+		do_attack()
 
 func _physics_process(delta: float) -> void:
 	if !navigation_agent.is_navigation_finished():
@@ -105,9 +102,16 @@ func _physics_process(delta: float) -> void:
 	if current_state == State.ATTACK and attacking == 15:
 		deal_damage()
 
+func do_attack(target: CharacterBody3D = current_target) -> void:
+	stop_moving()
+	attacking = 30
+	if target != null:
+		face_direction(target.position)
+
 func deal_damage(target: CharacterBody3D = current_target) -> void:
 	if target != null:
 		target.health -= damage
+		target.damaged.emit(self, damage)
 
 func stop_moving() -> void:
 	if current_state == State.MOVE:
@@ -128,6 +132,10 @@ func face_direction(direction: Vector3) -> void:
 
 func new_path(where_to: Vector3) -> void:
 	navigation_agent.target_position = where_to
+	
+func order_move(where_to: Vector3) -> void:
+	if navigation_agent.target_position.distance_squared_to(where_to) >= 4:
+		new_path(where_to)
 
 func _startup() -> void:
 	selected = false
@@ -149,10 +157,198 @@ func _startup() -> void:
 
 # AI
 
-var hold_position: Vector3
+const HELP_RANGE = 1
+const HELP_RANGE_SQ = HELP_RANGE**2
+const ORDER_RETURN_RANGE = 40
+const ORDER_RETURN_RANGE_SQ = ORDER_RETURN_RANGE**2
+const RETURN_RANGE = 20
+const RETURN_RANGE_SQ = RETURN_RANGE**2
+const TIME_TO_PORT = 5
+const UPDATE_INTERVAL = 0.5
+
+var return_position: Vector3
+var list: Array[CharacterBody3D]
+var threats: Array[float]
+var camp: Dictionary
+var t_status: ThreatStatus
+var t_time: float
+var attacker_pos: Dictionary = {}
+
+enum ThreatStatus {
+	OFF_COMBAT,
+	ON_COMBAT,
+	RETURNING,
+	RETURNED
+}
+
+func _swap(key1: int, key2: int) -> void:
+	var u = list[key1]
+	var r = threats[key1]
+	list[key1] = list[key2]
+	threats[key1] = threats[key2]
+	list[key1].attacker_pos[self] = key1
+	list[key2] = u
+	threats[key2] = r
+	u.attacker_pos[self] = key2
 
 func startAI() -> void:
-	pass
+	return_position = position
+	list = []
+	threats = []
+	t_status = ThreatStatus.OFF_COMBAT
+	t_time = 0
+	
+	var options: Array[CharacterBody3D] = []
+	for unit: CharacterBody3D in (units.get_children() as Array[CharacterBody3D]):
+		if self != unit and player_owner == null:
+			if position.distance_squared_to(unit.position) <= HELP_RANGE_SQ:
+				options.append(unit)
+	
+	var other = options.pick_random()
+	
+	if other != null:
+		camp = other.camp
+		if camp == null:
+			camp = {}
+			other.camp = camp
+	else:
+		camp = {}
+	
+	camp[self] = true
+	
+	damaged.connect(func (source: CharacterBody3D, amount: float) -> void:
+		if player_owner != source.player_owner and (t_status == ThreatStatus.OFF_COMBAT or t_status == ThreatStatus.ON_COMBAT):
+			var key: int
+			var old_amount: float = 0
+			var b = false
+			
+			if not source.attacker_pos.has(self):
+				list.append(source)
+				threats.append(amount)
+				key = list.size() - 1
+				source.attacker_pos[self] = key
+				if t_status == ThreatStatus.OFF_COMBAT:
+					t_status = ThreatStatus.ON_COMBAT
+				b = true
+			else:
+				key = source.attacker_pos[self]
+				old_amount = threats[key]
+			
+			var new_amount = maxf(old_amount + amount, 0)
+			
+			threats[key] = new_amount
+			
+			var i = 0
+			if new_amount > old_amount:
+				while true:
+					if key-i >= 0:
+						if threats[key-i] < new_amount:
+							_swap(key-i, key+1-i)
+						else:
+							break
+						i = i + 1
+					else:
+						break
+			elif new_amount < old_amount:
+				while true:
+					if key+i < list.size():
+						if threats[key+i] > new_amount:
+							_swap(key+i, key-1+i)
+						else:
+							break
+						i = i + 1
+					else:
+						break
+			
+			if b:
+				for friend: CharacterBody3D in camp.keys():
+					if friend != self and not source.attacker_pos.has(friend) and (friend.t_status == ThreatStatus.OFF_COMBAT or friend.t_status == ThreatStatus.ON_COMBAT):
+						friend.list.append(source)
+						friend.threats.append(0)
+						source.attacker_pos[friend] = friend.list.size() - 1
+						if friend.t_status == ThreatStatus.OFF_COMBAT:
+							friend.t_status = ThreatStatus.ON_COMBAT
+	)
 
+func _camp_command() -> void:
+	for npc: CharacterBody3D in camp.keys():
+		var status: ThreatStatus = npc.t_status
+		if status == ThreatStatus.ON_COMBAT:
+			npc.t_status = ThreatStatus.RETURNING
+			for i in range(npc.list.size() - 1, -1, -1):
+				npc.list[i].attacker_pos.erase(npc)
+				npc.list.remove_at(i)
+				npc.threats.remove_at(i)
+			npc.stop_moving()
+			npc.order_move(npc.return_position)
+			npc.t_time = TIME_TO_PORT
+		elif status == ThreatStatus.RETURNED:
+			npc.t_status = ThreatStatus.OFF_COMBAT
+			npc.t_time = 0
+			npc.stop_moving()
+
+func _attack(other: CharacterBody3D) -> void:
+	if position.distance_squared_to(other.position) <= MELEE_RANGE_SQ:
+		current_target = other
+		do_attack()
+	else:
+		order_move(other.position)
+
+var interval = 0
 func runAI(delta: float) -> void:
-	pass
+	interval += delta
+	if interval >= UPDATE_INTERVAL:
+		interval = 0
+		if t_status == ThreatStatus.ON_COMBAT:
+			t_time += UPDATE_INTERVAL
+			if position.distance_squared_to(return_position) <= RETURN_RANGE_SQ and list[0] != null:
+				var target: CharacterBody3D = list[0]
+				if target.position.distance_squared_to(return_position) <= ORDER_RETURN_RANGE_SQ:
+					if current_state == State.ATTACK or current_state == State.IDLE:
+						_attack(target)
+				else:
+					_camp_command()
+			else:
+				_camp_command()
+		elif t_status == ThreatStatus.RETURNING:
+			if t_time > 0:
+				t_time -= UPDATE_INTERVAL
+				if position.distance_squared_to(return_position) >= 5:
+					order_move(return_position)
+				elif current_state != State.MOVE:
+					t_status = ThreatStatus.RETURNED
+					var b = true
+					for other: CharacterBody3D in camp.keys():
+						if other.t_status != ThreatStatus.RETURNED:
+							b = false
+							break
+					if b:
+						_camp_command()
+			else:
+				if position.distance_squared_to(return_position) >= 5:
+					position = return_position
+				t_status = ThreatStatus.RETURNED
+				var b = true
+				for other: CharacterBody3D in camp.keys():
+					if other.t_status != ThreatStatus.RETURNED:
+						b = false
+						break
+				if b:
+					_camp_command()
+
+func _on_tree_exiting() -> void:
+	if list != null:
+		if t_status == ThreatStatus.RETURNING or t_status == ThreatStatus.RETURNED:
+			stop_moving()
+		
+		for i in range(list.size()):
+			list[i].attacker_pos.erase(self)
+		
+		camp.erase(self)
+	else:
+		for other in attacker_pos.keys():
+			var key = attacker_pos[other]
+			for i in range(key, other.list.size()):
+				other.list[i].attacker_pos[other] = i-1
+			other.list.remove_at(key)
+			other.threats.remove_at(key)
