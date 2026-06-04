@@ -3,10 +3,12 @@ extends CharacterBody3D
 signal death
 signal damaged(source: CharacterBody3D, amount: float)
 
-const MOVE_SPEED: float = 12.0
+const MOVE_SPEED: float = 10.0
 const LERP_VALUE: float = 0.15
-const MELEE_RANGE: float = 1.5
+const MELEE_RANGE: float = 2.0
 const MELEE_RANGE_SQ: float = MELEE_RANGE ** 2
+const MELEE_RANGE_THRESHOLD: float = 2.0
+const MELEE_RANGE_THRESHOLD_SQ: float = MELEE_RANGE_THRESHOLD ** 2
 
 enum State {
 	IDLE,
@@ -109,7 +111,7 @@ func do_attack(target: CharacterBody3D = current_target) -> void:
 		face_direction(target.position)
 
 func deal_damage(target: CharacterBody3D = current_target) -> void:
-	if target != null:
+	if target != null and position.distance_squared_to(target.position) <= MELEE_RANGE_THRESHOLD_SQ:
 		target.health -= damage
 		target.damaged.emit(self, damage)
 
@@ -163,6 +165,8 @@ const ORDER_RETURN_RANGE = 40
 const ORDER_RETURN_RANGE_SQ = ORDER_RETURN_RANGE**2
 const RETURN_RANGE = 20
 const RETURN_RANGE_SQ = RETURN_RANGE**2
+const SIGHT_RANGE = 6
+const SIGHT_RANGE_SQ = SIGHT_RANGE**2
 const TIME_TO_PORT = 5
 const UPDATE_INTERVAL = 0.5
 
@@ -299,7 +303,14 @@ func runAI(delta: float) -> void:
 	interval += delta
 	if interval >= UPDATE_INTERVAL:
 		interval = 0
-		if t_status == ThreatStatus.ON_COMBAT:
+		if t_status == ThreatStatus.OFF_COMBAT:
+			for unit: CharacterBody3D in units.get_children():
+				if player_owner != unit.player_owner and position.distance_squared_to(unit.position) <= SIGHT_RANGE:
+					list.append(unit)
+					threats.append(0)
+					unit.attacker_pos[self] = list.size() - 1
+					t_status = ThreatStatus.ON_COMBAT
+		elif t_status == ThreatStatus.ON_COMBAT:
 			t_time += UPDATE_INTERVAL
 			if position.distance_squared_to(return_position) <= RETURN_RANGE_SQ and list[0] != null:
 				var target: CharacterBody3D = list[0]
