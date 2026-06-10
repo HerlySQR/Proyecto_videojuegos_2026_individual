@@ -1,10 +1,8 @@
 extends Node
 
-const TYPE_RTS_CAMERA: Script = preload("main.gd")
 const TYPE_SELECTION_MANAGER: Script = preload("selection_manager.gd")
 const UI_3D: Script = preload("ui_3d.gd")
 
-@onready var rts_camera: TYPE_RTS_CAMERA = $RTSCamera
 @onready var selection_manager: TYPE_SELECTION_MANAGER = $SelectionManager
 @onready var units: Node = $"../Units"
 

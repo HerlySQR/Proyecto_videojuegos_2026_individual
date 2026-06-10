@@ -1,13 +1,16 @@
 extends Node
 
 @onready var player: Node = $"../RTSPlayer"
+@onready var hero: CharacterBody3D = $Hero
 
 signal unit_death(unit: CharacterBody3D)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	hero.player_owner = player
 	for unit in (get_children() as Array[CharacterBody3D]):
 		if unit.player_owner != player:
+			unit.color = Color.BLUE
 			unit.startAI()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -5,11 +5,6 @@ extends Node
 func _ready() -> void:
 	pass # Replace with function body.
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-
 func create_debug_sphere_at(node_caller: Node, at_pos: Vector3, time: float, color: Color) -> void:
 	var sphere: MeshInstance3D = MeshInstance3D.new()
 	var debug_sphere_mesh: SphereMesh = SphereMesh.new()

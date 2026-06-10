@@ -3,12 +3,12 @@ extends CharacterBody3D
 signal death
 signal damaged(source: CharacterBody3D, amount: float)
 
-const MOVE_SPEED: float = 10.0
 const LERP_VALUE: float = 0.15
 const MELEE_RANGE: float = 2.0
 const MELEE_RANGE_SQ: float = MELEE_RANGE ** 2
 const MELEE_RANGE_THRESHOLD: float = 2.0
 const MELEE_RANGE_THRESHOLD_SQ: float = MELEE_RANGE_THRESHOLD ** 2
+const GRAVITY = 20.0
 
 enum State {
 	IDLE,
@@ -21,7 +21,10 @@ var current_state: State = State.IDLE
 var new_path_goal: Vector3 = Vector3.ZERO
 var current_target: CharacterBody3D = null
 var health: float = 100.
+var max_health: float = 100.
 var damage: float = 10.
+var move_speed: float = 10.0
+var look_direction: = Vector3.ZERO
 var color: Color = Color.RED:
 	set(new_color):
 		if _material == null:
@@ -55,10 +58,6 @@ var selected: bool = false:
 	get():
 		return selected
 
-var path: PackedVector3Array = []
-var _current_path_index: int
-var _move_to_path: bool = false
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	_startup()
@@ -80,6 +79,12 @@ func _process(delta: float) -> void:
 var attacking = 0
 
 func _unhandled_input(event: InputEvent) -> void:
+	if  Input.is_action_just_pressed(&"input_action_space_bar") and player_owner != null:
+		var camera = get_viewport().get_camera_3d()
+		var parent: Node3D = camera.get_parent()
+		parent.position.x = global_position.x
+		parent.position.z = global_position.z + camera.position.z/2
+		
 	if not selected:
 		return
 
@@ -89,17 +94,54 @@ func _unhandled_input(event: InputEvent) -> void:
 			if unit != self and unit.position.distance_squared_to(position) <= MELEE_RANGE_SQ and unit.player_owner != player_owner:
 				possible_targets.append(unit)
 		
-		current_target = possible_targets.pick_random()
+		current_target = possible_targets.pick_random() if !possible_targets.is_empty() else null
 		do_attack()
 
 func _physics_process(delta: float) -> void:
+	if not is_on_floor():
+		velocity.y -= GRAVITY * delta
+
+	if look_direction.length() > 0.01:
+		var target_angle = atan2(
+			look_direction.x,
+			look_direction.z
+		)
+
+		body.rotation.y = lerp_angle(
+			body.rotation.y,
+			target_angle,
+			15.0 * delta
+		)
+
 	if !navigation_agent.is_navigation_finished():
-		follow_path(delta)
+		var next_point = navigation_agent.get_next_path_position()
+		var dir = next_point - global_position
+		face_direction(next_point)
+		dir.y = 0
+
+		if dir.length() > 0.1:
+			dir = dir.normalized()
+
+			velocity.x = dir.x * move_speed
+			velocity.z = dir.z * move_speed
+	
+			animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(1, 0))
+		else:
+			velocity.x = 0
+			velocity.z = 0
+		
+		move_and_slide()
 	else:
+		velocity.x = 0
+		velocity.z = 0
+	#if !navigation_agent.is_navigation_finished():
+		#follow_path(delta)
+	#else:
 		if attacking > 0:
 			animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(0, 1))
 		else:
 			animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(0, 0))
+
 	attacking -= 1
 	if current_state == State.ATTACK and attacking == 15:
 		deal_damage()
@@ -122,15 +164,20 @@ func stop_moving() -> void:
 func follow_path(delta: float) -> void:
 	var target_pos = navigation_agent.get_next_path_position()
 	var direction = global_position.direction_to(target_pos)
+	direction.y = 0
+	direction *= move_speed
+
 	face_direction(target_pos)
 	
-	velocity = direction * MOVE_SPEED
+	velocity.x = direction.x
+	velocity.z = direction.z
+
 	move_and_slide()
 	
 	animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(1, 0))
 
-func face_direction(direction: Vector3) -> void:
-	look_at(Vector3(direction.x, global_position.y, direction.z), Vector3.UP)
+func face_direction(dir: Vector3) -> void:
+	look_direction = dir - global_position
 
 func new_path(where_to: Vector3) -> void:
 	navigation_agent.target_position = where_to
@@ -149,11 +196,11 @@ func _startup() -> void:
 	#obj_selection_aabb.mesh.size = selection_aabb.size
 	#obj_selection_aabb.position = aabb_center
 	
-	var aabb = body.get_mesh().get_aabb()
-	var box_shape = BoxShape3D.new()
-	box_shape.size = aabb.size
-	collision_shape.shape = box_shape
-	collision_shape.position = aabb.position + aabb.size * 0.5
+	#var aabb = body.get_mesh().get_aabb()
+	#var box_shape = BoxShape3D.new()
+	#box_shape.size = aabb.size
+	#collision_shape.shape = box_shape
+	#collision_shape.position = aabb.position + aabb.size * 0.5
 	
 	obj_selection_aabb.queue_free()
 
@@ -196,6 +243,11 @@ func _swap(key1: int, key2: int) -> void:
 	u.attacker_pos[self] = key2
 
 func startAI() -> void:
+	move_speed = 9.
+	health = 50.
+	max_health = 50.
+	damage = 5.
+	
 	return_position = position
 	list = []
 	threats = []
@@ -208,7 +260,7 @@ func startAI() -> void:
 			if position.distance_squared_to(unit.position) <= HELP_RANGE_SQ:
 				options.append(unit)
 	
-	var other = options.pick_random()
+	var other = options.pick_random() if !options.is_empty() else null
 	
 	if other != null:
 		camp = other.camp
@@ -347,7 +399,7 @@ func runAI(delta: float) -> void:
 				if b:
 					_camp_command()
 
-func _on_tree_exiting() -> void:
+func _on_death() -> void:
 	if list != null:
 		if t_status == ThreatStatus.RETURNING or t_status == ThreatStatus.RETURNED:
 			stop_moving()

@@ -11,12 +11,6 @@ func _ready() -> void:
 	fullscreen.button_pressed = true if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN else false
 	volumen.value = AudioServer.get_bus_volume_linear(AudioServer.get_bus_index("Master"))
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-
-
 func _on_play_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/scenes/mundo.tscn")
 
