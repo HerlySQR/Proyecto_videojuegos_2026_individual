@@ -4,6 +4,7 @@ const CAMERA_PAN_MARGIN: float = 5.0 # Pixels to trigger pan on the screen edge
 const CAMERA_ZOOM_SPEED: float = 1.0
 const CAMERA_ZOOM_RANGE: Vector2 = Vector2(50, 200)
 const CAMERA_MOVE_SPEED: Vector2 = Vector2(40, 100)
+const CAMERA_ROTATION_SPEED: float = 1.0
 
 var cam_movement_velocity: Vector3 = Vector3.ZERO
 var cam_zoom_velocity: float = 0.0
@@ -19,6 +20,7 @@ func _process(delta: float) -> void:
 	camera_pan(delta)
 	camera_move(delta)
 	camera_zoom(delta)
+	camera_rotate(delta)
 	_apply_movement_velocity()
 	_apply_zoom_velocity()
 	
@@ -47,6 +49,12 @@ func camera_move(delta: float) -> void:
 		cam_movement_velocity.x = -1 * delta
 	if Input.is_action_pressed(&"input_action_camera_right"):
 		cam_movement_velocity.x = 1 * delta
+
+func camera_rotate(delta: float) -> void:
+	if Input.is_action_pressed(&"input_action_rotate_camera_left"):
+		global_rotation.y += CAMERA_ROTATION_SPEED * delta
+	if Input.is_action_pressed(&"input_action_rotate_camera_right"):
+		global_rotation.y -= CAMERA_ROTATION_SPEED * delta
 
 func camera_zoom(delta: float) -> void:
 	if Input.is_action_just_released(&"input_camera_zoom_in"):
