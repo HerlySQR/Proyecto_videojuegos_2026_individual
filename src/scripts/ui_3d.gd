@@ -3,7 +3,7 @@ extends Node
 const ORDER_EFFECT: PackedScene = preload("res://src/scenes/order_effect.tscn")
 
 static func create_expanding_circle(obj_caller: Node, where: Vector3) -> void:
-	var circle: Sprite3D = ORDER_EFFECT.instantiate()
+	var circle: Decal = ORDER_EFFECT.instantiate()
 	circle.position = where + Vector3(0, 0.05, 0)
 	obj_caller.get_tree().root.add_child(circle)
 	_scale_expand_fade_out(circle, Vector3(2, 1, 2), 0.2)

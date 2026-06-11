@@ -4,11 +4,15 @@ signal death
 signal damaged(source: CharacterBody3D, amount: float)
 
 const LERP_VALUE: float = 0.15
-const MELEE_RANGE: float = 2.0
+const MELEE_RANGE: float = 2.5
 const MELEE_RANGE_SQ: float = MELEE_RANGE ** 2
-const MELEE_RANGE_THRESHOLD: float = 2.0
+const MELEE_RANGE_THRESHOLD: float = 3.0
 const MELEE_RANGE_THRESHOLD_SQ: float = MELEE_RANGE_THRESHOLD ** 2
 const GRAVITY = 20.0
+
+const IDLE_ANIMATION = Vector2(0, 0)
+const MOVE_ANIMATION = Vector2(1, 0)
+const ATTACK_ANIMATION = Vector2(0, 1)
 
 enum State {
 	IDLE,
@@ -25,6 +29,8 @@ var max_health: float = 100.
 var damage: float = 10.
 var move_speed: float = 10.0
 var look_direction: = Vector3.ZERO
+var current_animation = IDLE_ANIMATION
+var desired_animation = IDLE_ANIMATION
 var color: Color = Color.RED:
 	set(new_color):
 		if _material == null:
@@ -39,7 +45,7 @@ var color: Color = Color.RED:
 
 var _material: StandardMaterial3D
 
-@onready var circle_selection: Sprite3D = $CircleSelection
+@onready var circle_selection: Decal = $CircleSelection
 @onready var obj_selection_aabb: MeshInstance3D = $SelectionAABB
 @onready var body: MeshInstance3D = $Armature/Skeleton3D/body
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
@@ -128,27 +134,30 @@ func _physics_process(delta: float) -> void:
 
 			var desired_velocity = dir * move_speed
 			navigation_agent.velocity = desired_velocity
-	
-			animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(1, 0))
 		else:
 			velocity.x = 0
 			velocity.z = 0
 		
 		move_and_slide()
+	
+		desired_animation = MOVE_ANIMATION
 	else:
 		velocity.x = 0
 		velocity.z = 0
-	#if !navigation_agent.is_navigation_finished():
-		#follow_path(delta)
-	#else:
+
 		if attacking > 0:
-			animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(0, 1))
+			desired_animation = ATTACK_ANIMATION
 		else:
-			animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(0, 0))
+			desired_animation = IDLE_ANIMATION
 
 	attacking -= 1
 	if current_state == State.ATTACK and attacking == 15:
 		deal_damage()
+	
+	if current_animation != desired_animation:
+		current_animation = current_animation.move_toward(desired_animation, LERP_VALUE)
+	
+	animation_tree.set("parameters/BlendSpace2D/blend_position", current_animation)
 
 func do_attack(target: CharacterBody3D = current_target) -> void:
 	stop_moving()
@@ -164,21 +173,6 @@ func deal_damage(target: CharacterBody3D = current_target) -> void:
 func stop_moving() -> void:
 	if current_state == State.MOVE:
 		navigation_agent.target_position = position
-
-func follow_path(delta: float) -> void:
-	var target_pos = navigation_agent.get_next_path_position()
-	var direction = global_position.direction_to(target_pos)
-	direction.y = 0
-	direction *= move_speed
-
-	face_direction(target_pos)
-	
-	velocity.x = direction.x
-	velocity.z = direction.z
-
-	move_and_slide()
-	
-	animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(1, 0))
 
 func face_direction(dir: Vector3) -> void:
 	look_direction = dir - global_position
