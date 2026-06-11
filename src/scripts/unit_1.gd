@@ -97,6 +97,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		current_target = possible_targets.pick_random() if !possible_targets.is_empty() else null
 		do_attack()
 
+func _on_navigation_agent_3d_velocity_computed(safe_velocity: Vector3) -> void:
+	velocity.x = safe_velocity.x
+	velocity.z = safe_velocity.z
+
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
@@ -122,8 +126,8 @@ func _physics_process(delta: float) -> void:
 		if dir.length() > 0.1:
 			dir = dir.normalized()
 
-			velocity.x = dir.x * move_speed
-			velocity.z = dir.z * move_speed
+			var desired_velocity = dir * move_speed
+			navigation_agent.velocity = desired_velocity
 	
 			animation_tree.set("parameters/BlendSpace2D/blend_position", Vector2(1, 0))
 		else:
