@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://dw66ajkp3cd4l"]
+
+[ext_resource type="Script" uid="uid://cxadh75ug17ij" path="res://src/scripts/fps.gd" id="1_jef5w"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_q53ni"]
+shadow_size = 16
+shadow_color = Color(0, 0, 0, 1)
+shadow_offset = Vector2(0, 0)
+
+[node name="Fps" type="Label"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1083.0
+offset_bottom = -618.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "FPS: 60"
+label_settings = SubResource("LabelSettings_q53ni")
+script = ExtResource("1_jef5w")

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://274b4ico2qh7"
-path.s3tc="res://.godot/imported/Green-Button-PNG-Pic.png-a0ad66ef5dcefd9d8881ce74289dbb73.s3tc.ctex"
+uid="uid://j53jxex5bqvv"
+path.s3tc="res://.godot/imported/data_fow.png-b44c3ed4a0f17fe2451ec498f0af0e30.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://src/assets/Green-Button-PNG-Pic.png"
-dest_files=["res://.godot/imported/Green-Button-PNG-Pic.png-a0ad66ef5dcefd9d8881ce74289dbb73.s3tc.ctex"]
+source_file="res://src/assets/data_fow.png"
+dest_files=["res://.godot/imported/data_fow.png-b44c3ed4a0f17fe2451ec498f0af0e30.s3tc.ctex"]
 
 [params]
 

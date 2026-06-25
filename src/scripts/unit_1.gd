@@ -190,7 +190,7 @@ func _startup() -> void:
 	#obj_selection_aabb.mesh = BoxMesh.new()
 	#var selection_aabb: AABB = global_transform * (body.mesh.get_aabb())
 	#var aabb_center: Vector3 = selection_aabb.position + selection_aabb.size*0.5
-	
+	#
 	#obj_selection_aabb.mesh.size = selection_aabb.size
 	#obj_selection_aabb.position = aabb_center
 	

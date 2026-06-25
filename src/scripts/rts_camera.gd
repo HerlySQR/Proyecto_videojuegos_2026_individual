@@ -67,7 +67,7 @@ func _setup_camera(cam: Camera3D) -> void:
 	cam.position.y = 3.0
 	cam.rotation_degrees.x = -30
 	#rotation_degrees.y = -45
-	cam.translate_object_local(Vector3(0, 0, 100))
+	cam.translate_object_local(Vector3(0, 0, 75))
 
 func _apply_movement_velocity() -> void:
 	if cam_movement_velocity != Vector3.ZERO:
