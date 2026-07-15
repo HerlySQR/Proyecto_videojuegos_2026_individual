@@ -1,10 +1,10 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://cm6lf7m4hesxh"]
 
-[ext_resource type="Shader" uid="uid://dgr2fafi6aaea" path="res://src/custom_mesh/FogShader.gdshader" id="1_erg12"]
+[ext_resource type="Shader" uid="uid://c618qoy28k1c1" path="res://src/custom_mesh/FogMaterial.gdshader" id="1_erg12"]
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_erg12")
 shader_parameter/world_min = Vector2(0, 0)
 shader_parameter/world_max = Vector2(0, 0)
-shader_parameter/darkness = 0.15
+shader_parameter/edge_size = 0.08
