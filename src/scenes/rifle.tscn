@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://dies8bblrtnbq"]
+
+[ext_resource type="PackedScene" uid="uid://h1ooriwtd1fk" path="res://src/assets/rifle.fbx" id="1_gl4uk"]
+[ext_resource type="Script" uid="uid://dbe888lwkb4a7" path="res://src/scenes/rifle.gd" id="2_cqdmb"]
+
+[node name="rifle" instance=ExtResource("1_gl4uk")]
+transform = Transform3D(-2.18557e-08, 0, -0.5, 0, 0.5, 0, 0.5, 0, -2.18557e-08, 0, 0, 0)
+script = ExtResource("2_cqdmb")
+
+[node name="Marker3D" type="Marker3D" parent="Cube" index="0"]
+transform = Transform3D(0.00629288, 0, 0, 0, 0.0589864, -0.112764, 0, 0.0851598, 0.0445469, 0.0101338, 0.00226809, -0.000113457)
+
+[node name="AttachPoint" type="Marker3D" parent="." index="1"]
+transform = Transform3D(1, 0, -1.77636e-15, 0, 0.570312, 0.821428, 0, -0.821428, 0.570312, -0.614591, 0.96499, -0.000940442)

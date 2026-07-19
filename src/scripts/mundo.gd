@@ -2,7 +2,6 @@ extends Node3D
 
 @onready var player: Node = $RTSPlayer
 @onready var units: Node = $Units
-@onready var map: MeshInstance3D = $NavigationRegion3D/Map
 
 """
 @onready var FOW: Control = $RtsFowTexture

@@ -4,7 +4,7 @@ const CAMERA_PAN_MARGIN: float = 5.0 # Pixels to trigger pan on the screen edge
 const CAMERA_ZOOM_SPEED: float = 1.0
 const CAMERA_ZOOM_RANGE: Vector2 = Vector2(50, 200)
 const CAMERA_MOVE_SPEED: Vector2 = Vector2(40, 100)
-const CAMERA_ROTATION_SPEED: float = 1.0
+const CAMERA_ROTATION_SPEED: float = 1.5
 
 var cam_movement_velocity: Vector3 = Vector3.ZERO
 var cam_zoom_velocity: float = 0.0
@@ -85,3 +85,16 @@ func _apply_zoom_velocity() -> void:
 		if (calculated_zoom > CAMERA_ZOOM_RANGE.x) and (calculated_zoom < CAMERA_ZOOM_RANGE.y):
 			camera_3d.translate_object_local(Vector3(0, 0, cam_zoom_velocity))
 		cam_zoom_velocity = 0
+
+func center_on_point(target: Vector3):
+	var center = get_viewport().get_visible_rect().size / 2
+
+	var from = camera_3d.project_ray_origin(center)
+	var dir = camera_3d.project_ray_normal(center)
+
+	var plane = Plane(Vector3.UP, target.y)
+
+	var hit = plane.intersects_ray(from, dir)
+
+	if hit != null:
+		global_position += target - hit

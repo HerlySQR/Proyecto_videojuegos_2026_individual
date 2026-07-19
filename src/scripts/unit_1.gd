@@ -4,7 +4,7 @@ signal death
 signal damaged(source: CharacterBody3D, amount: float)
 
 const LERP_VALUE: float = 0.15
-const MELEE_RANGE: float = 2.5
+const MELEE_RANGE: float = 2
 const MELEE_RANGE_SQ: float = MELEE_RANGE ** 2
 const MELEE_RANGE_THRESHOLD: float = 3.0
 const MELEE_RANGE_THRESHOLD_SQ: float = MELEE_RANGE_THRESHOLD ** 2
@@ -31,6 +31,8 @@ var move_speed: float = 10.0
 var look_direction: = Vector3.ZERO
 var current_animation = IDLE_ANIMATION
 var desired_animation = IDLE_ANIMATION
+var previous_position := Vector3.ZERO
+var weapon: Node3D
 var color: Color = Color.RED:
 	set(new_color):
 		if _material == null:
@@ -53,6 +55,7 @@ var _material: StandardMaterial3D
 @onready var armature: Node3D = $Armature
 @onready var animation_tree: AnimationTree = $AnimationTree
 @onready var units: Node = $".."
+@onready var weapon_attachment: BoneAttachment3D = $Armature/Skeleton3D/WeaponAttachment
 
 var selected: bool = false:
 	set(new_value):
@@ -79,17 +82,16 @@ func _process(delta: float) -> void:
 	
 	if health <= 0:
 		emit_signal("death")
-		units.remove_child(self)
-		queue_free()
+		if owner == null:
+			queue_free()
 
 var attacking = 0
 
 func _unhandled_input(event: InputEvent) -> void:
-	if  Input.is_action_just_pressed(&"input_action_space_bar") and player_owner != null:
+	if Input.is_action_just_pressed(&"input_action_space_bar") and player_owner != null:
 		var camera = get_viewport().get_camera_3d()
 		var parent: Node3D = camera.get_parent()
-		parent.position.x = global_position.x
-		parent.position.z = global_position.z + camera.position.z/2
+		parent.center_on_point(global_position)
 		
 	if not selected:
 		return
@@ -97,7 +99,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if current_state != State.ATTACK and Input.is_action_just_pressed(&"Input_action_attack"):
 		var possible_targets: Array[Node3D] = []
 		for unit: Node3D in units.get_children():
-			if unit != self and unit.position.distance_squared_to(position) <= MELEE_RANGE_SQ and unit.player_owner != player_owner:
+			if unit != self and unit.global_position.distance_squared_to(global_position) <= MELEE_RANGE_SQ and unit.player_owner != player_owner:
 				possible_targets.append(unit)
 		
 		current_target = possible_targets.pick_random() if !possible_targets.is_empty() else null
@@ -112,16 +114,8 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= GRAVITY * delta
 
 	if look_direction.length() > 0.01:
-		var target_angle = atan2(
-			look_direction.x,
-			look_direction.z
-		)
-
-		body.rotation.y = lerp_angle(
-			body.rotation.y,
-			target_angle,
-			15.0 * delta
-		)
+		var target_angle = atan2(look_direction.x, look_direction.z)
+		global_rotation.y = lerp_angle(global_rotation.y, target_angle, 15.0 * delta)
 
 	if !navigation_agent.is_navigation_finished():
 		var next_point = navigation_agent.get_next_path_position()
@@ -137,8 +131,6 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity.x = 0
 			velocity.z = 0
-		
-		move_and_slide()
 	
 		desired_animation = MOVE_ANIMATION
 	else:
@@ -149,30 +141,45 @@ func _physics_process(delta: float) -> void:
 			desired_animation = ATTACK_ANIMATION
 		else:
 			desired_animation = IDLE_ANIMATION
+		
+	move_and_slide()
 
 	attacking -= 1
 	if current_state == State.ATTACK and attacking == 15:
-		deal_damage()
+		if current_target != null and global_position.distance_squared_to(current_target.global_position) <= MELEE_RANGE_THRESHOLD_SQ:
+			deal_damage()
 	
 	if current_animation != desired_animation:
 		current_animation = current_animation.move_toward(desired_animation, LERP_VALUE)
 	
 	animation_tree.set("parameters/BlendSpace2D/blend_position", current_animation)
 
+func add_weapon(new_weapon: PackedScene) -> void:
+	if weapon == null:
+		weapon = new_weapon.instantiate()
+		weapon_attachment.add_child(weapon)
+		weapon.initialize(self)
+		weapon.position = Vector3(-0.172, 0.751, -0.091)
+		weapon.rotation_degrees = Vector3(-38.7, 98.2, 155.6)
+
 func do_attack(target: CharacterBody3D = current_target) -> void:
 	stop_moving()
-	attacking = 30
+	if weapon == null:
+		attacking = 30
+	else:
+		weapon.shoot()
 	if target != null:
-		face_direction(target.position)
+		face_direction(target.global_position)
 
 func deal_damage(target: CharacterBody3D = current_target) -> void:
-	if target != null and position.distance_squared_to(target.position) <= MELEE_RANGE_THRESHOLD_SQ:
+	if target != null:
 		target.health -= damage
 		target.damaged.emit(self, damage)
 
 func stop_moving() -> void:
-	if current_state == State.MOVE:
-		navigation_agent.target_position = position
+	navigation_agent.target_position = global_position
+	navigation_agent.velocity = Vector3.ZERO
+	velocity = Vector3.ZERO
 
 func face_direction(dir: Vector3) -> void:
 	look_direction = dir - global_position
@@ -181,7 +188,7 @@ func new_path(where_to: Vector3) -> void:
 	navigation_agent.target_position = where_to
 	
 func order_move(where_to: Vector3) -> void:
-	if navigation_agent.target_position.distance_squared_to(where_to) >= 4:
+	if navigation_agent.target_position.distance_squared_to(where_to) >= 0.25:
 		new_path(where_to)
 
 func _startup() -> void:
@@ -213,7 +220,9 @@ const RETURN_RANGE_SQ = RETURN_RANGE**2
 const SIGHT_RANGE = 6
 const SIGHT_RANGE_SQ = SIGHT_RANGE**2
 const TIME_TO_PORT = 5
-const UPDATE_INTERVAL = 0.5
+const UPDATE_INTERVAL = 0.2
+const WEAPON_RANGE = 7
+const WEAPON_RANGE_SQ = WEAPON_RANGE**2
 
 var return_position: Vector3
 var list: Array[CharacterBody3D]
@@ -246,7 +255,7 @@ func startAI() -> void:
 	max_health = 50.
 	damage = 5.
 	
-	return_position = position
+	return_position = global_position
 	list = []
 	threats = []
 	t_status = ThreatStatus.OFF_COMBAT
@@ -255,7 +264,7 @@ func startAI() -> void:
 	var options: Array[CharacterBody3D] = []
 	for unit: CharacterBody3D in (units.get_children() as Array[CharacterBody3D]):
 		if self != unit and player_owner == null:
-			if position.distance_squared_to(unit.position) <= HELP_RANGE_SQ:
+			if global_position.distance_squared_to(unit.global_position) <= HELP_RANGE_SQ:
 				options.append(unit)
 	
 	var other = options.pick_random() if !options.is_empty() else null
@@ -342,11 +351,12 @@ func _camp_command() -> void:
 			npc.stop_moving()
 
 func _attack(other: CharacterBody3D) -> void:
-	if position.distance_squared_to(other.position) <= MELEE_RANGE_SQ:
+	var attack_range = MELEE_RANGE_SQ if weapon == null else WEAPON_RANGE_SQ
+	if global_position.distance_squared_to(other.global_position) <= attack_range:
 		current_target = other
 		do_attack()
 	else:
-		order_move(other.position)
+		order_move(other.global_position)
 
 var interval = 0
 func runAI(delta: float) -> void:
@@ -355,16 +365,16 @@ func runAI(delta: float) -> void:
 		interval = 0
 		if t_status == ThreatStatus.OFF_COMBAT:
 			for unit: CharacterBody3D in units.get_children():
-				if player_owner != unit.player_owner and position.distance_squared_to(unit.position) <= SIGHT_RANGE:
+				if player_owner != unit.player_owner and global_position.distance_squared_to(unit.global_position) <= SIGHT_RANGE_SQ:
 					list.append(unit)
 					threats.append(0)
 					unit.attacker_pos[self] = list.size() - 1
 					t_status = ThreatStatus.ON_COMBAT
 		elif t_status == ThreatStatus.ON_COMBAT:
 			t_time += UPDATE_INTERVAL
-			if position.distance_squared_to(return_position) <= RETURN_RANGE_SQ and list[0] != null:
+			if global_position.distance_squared_to(return_position) <= RETURN_RANGE_SQ and list[0] != null:
 				var target: CharacterBody3D = list[0]
-				if target.position.distance_squared_to(return_position) <= ORDER_RETURN_RANGE_SQ:
+				if target.global_position.distance_squared_to(return_position) <= ORDER_RETURN_RANGE_SQ:
 					if current_state == State.ATTACK or current_state == State.IDLE:
 						_attack(target)
 				else:
@@ -374,7 +384,7 @@ func runAI(delta: float) -> void:
 		elif t_status == ThreatStatus.RETURNING:
 			if t_time > 0:
 				t_time -= UPDATE_INTERVAL
-				if position.distance_squared_to(return_position) >= 5:
+				if global_position.distance_squared_to(return_position) >= 5:
 					order_move(return_position)
 				elif current_state != State.MOVE:
 					t_status = ThreatStatus.RETURNED
@@ -386,8 +396,8 @@ func runAI(delta: float) -> void:
 					if b:
 						_camp_command()
 			else:
-				if position.distance_squared_to(return_position) >= 5:
-					position = return_position
+				if global_position.distance_squared_to(return_position) >= 5:
+					global_position = return_position
 				t_status = ThreatStatus.RETURNED
 				var b = true
 				for other: CharacterBody3D in camp.keys():

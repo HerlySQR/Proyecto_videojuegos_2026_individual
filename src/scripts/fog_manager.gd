@@ -4,10 +4,11 @@ extends Node
 @onready var terrain: MeshInstance3D = $"../../NavigationRegion3D/Terrain"
 @onready var fog_terrain: MeshInstance3D = $"../../FogTerrain"
 @onready var trees: Node = $"../../NavigationRegion3D/Trees"
+@onready var units: Node = $"../../Units"
 
 const MAP_SIZE := 400.0
-const TEXTURE_SIZE := 512
-const VISION_RADIUS := 10.0
+const TEXTURE_SIZE := 2048
+const VISION_RADIUS := 15.0
 
 var world_min: Vector2
 var world_max: Vector2
@@ -15,31 +16,24 @@ var visibility_image: Image
 var visibility_texture: ImageTexture
 var explored_image: Image
 var explored_texture: ImageTexture
-var fog_objects: Array[MeshInstance3D] = []
+var fog_objects: Array[Node3D] = []
 
 func _ready():
-	var stack = [trees]
+	"""var stack = [trees, units]
 	while stack.size() > 0:
 		var current = stack.pop_back()
 		for child in current.get_children():
 			if child is Node:
 				stack.append(child)
 				if child is MeshInstance3D:
-					fog_objects.append(child)
+					fog_objects.append(child)"""
+	for node in trees.get_children():
+		fog_objects.append(node)
+	for node in units.get_children():
+		fog_objects.append(node)
 	
-	visibility_image = Image.create(
-		TEXTURE_SIZE,
-		TEXTURE_SIZE,
-		false,
-		Image.FORMAT_RGBA8
-	)
-
-	explored_image = Image.create(
-		TEXTURE_SIZE,
-		TEXTURE_SIZE,
-		false,
-		Image.FORMAT_RGBA8
-	)
+	visibility_image = Image.create(TEXTURE_SIZE, TEXTURE_SIZE, false, Image.FORMAT_RGBA8)
+	explored_image = Image.create(TEXTURE_SIZE, TEXTURE_SIZE, false, Image.FORMAT_RGBA8)
 
 	visibility_image.fill(Color.BLACK)
 	explored_image.fill(Color.BLACK)
@@ -72,13 +66,21 @@ func _process(delta):
 	visibility_texture.update(visibility_image)
 	explored_texture.update(explored_image)
 	
-	for obj in fog_objects:
-		if is_visible_world(obj.global_position):
-			obj.visible = true
-		elif is_explored_world(obj.global_position):
-			obj.visible = true
+	for i in range(fog_objects.size() - 1, -1, -1):
+		var obj = fog_objects[i]
+
+		if is_instance_valid(obj):
+			if is_visible_world(obj.global_position):
+				obj.visible = true
+			elif is_explored_world(obj.global_position):
+				if obj is CharacterBody3D:
+					obj.visible = false
+				else:
+					obj.visible = true
+			else:
+				obj.visible = false
 		else:
-			obj.visible = false
+			fog_objects.remove_at(i)
 
 	for i in range(fog_terrain.mesh.get_surface_count()):
 		var mat := fog_terrain.get_active_material(i) as ShaderMaterial

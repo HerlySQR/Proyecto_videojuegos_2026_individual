@@ -2,6 +2,9 @@ extends Node
 
 @onready var player: Node = $"../RTSPlayer"
 @onready var hero: CharacterBody3D = $Hero
+@onready var npc_6: CharacterBody3D = $NPC_6
+
+const RIFLE = preload("res://src/scenes/rifle.tscn")
 
 signal unit_death(unit: CharacterBody3D)
 
@@ -12,6 +15,7 @@ func _ready() -> void:
 		if unit.player_owner != player:
 			unit.color = Color.BLUE
 			unit.startAI()
+	npc_6.add_weapon(RIFLE)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
