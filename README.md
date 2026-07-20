@@ -5,4 +5,5 @@ La idea es hacer un juego:
 - RPG
 - 2D o 3D
 - Single-player
-<img width="353" height="450" alt="image" src="https://github.com/user-attachments/assets/5da520d0-04aa-47fd-9136-3d1c59152a93" />
+
+En el que eliges si matar o no a los enemigos, lo cual hará que la historia se moldee según las decisiones que tomes.
