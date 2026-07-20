@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://dies8bblrtnbq"]
 
 [ext_resource type="PackedScene" uid="uid://h1ooriwtd1fk" path="res://src/assets/rifle.fbx" id="1_gl4uk"]
-[ext_resource type="Script" uid="uid://dbe888lwkb4a7" path="res://src/scenes/rifle.gd" id="2_cqdmb"]
+[ext_resource type="Script" uid="uid://dbe888lwkb4a7" path="res://src/scripts/rifle.gd" id="2_cqdmb"]
 
 [node name="rifle" instance=ExtResource("1_gl4uk")]
 transform = Transform3D(-2.18557e-08, 0, -0.5, 0, 0.5, 0, 0.5, 0, -2.18557e-08, 0, 0, 0)

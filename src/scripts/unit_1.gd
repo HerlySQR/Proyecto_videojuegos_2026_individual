@@ -217,12 +217,14 @@ const ORDER_RETURN_RANGE = 40
 const ORDER_RETURN_RANGE_SQ = ORDER_RETURN_RANGE**2
 const RETURN_RANGE = 20
 const RETURN_RANGE_SQ = RETURN_RANGE**2
-const SIGHT_RANGE = 6
-const SIGHT_RANGE_SQ = SIGHT_RANGE**2
+const MELEE_SIGHT_RANGE = 8
+const MELEE_SIGHT_RANGE_SQ = MELEE_SIGHT_RANGE**2
 const TIME_TO_PORT = 5
 const UPDATE_INTERVAL = 0.2
-const WEAPON_RANGE = 7
+const WEAPON_RANGE = 9
 const WEAPON_RANGE_SQ = WEAPON_RANGE**2
+const WEAPON_SIGHT_RANGE = 14
+const WEAPON_SIGHT_RANGE_SQ = WEAPON_SIGHT_RANGE**2
 
 var return_position: Vector3
 var list: Array[CharacterBody3D]
@@ -352,7 +354,7 @@ func _camp_command() -> void:
 
 func _attack(other: CharacterBody3D) -> void:
 	var attack_range = MELEE_RANGE_SQ if weapon == null else WEAPON_RANGE_SQ
-	if global_position.distance_squared_to(other.global_position) <= attack_range:
+	if current_state != State.ATTACK and global_position.distance_squared_to(other.global_position) <= attack_range:
 		current_target = other
 		do_attack()
 	else:
@@ -365,11 +367,13 @@ func runAI(delta: float) -> void:
 		interval = 0
 		if t_status == ThreatStatus.OFF_COMBAT:
 			for unit: CharacterBody3D in units.get_children():
-				if player_owner != unit.player_owner and global_position.distance_squared_to(unit.global_position) <= SIGHT_RANGE_SQ:
-					list.append(unit)
-					threats.append(0)
-					unit.attacker_pos[self] = list.size() - 1
-					t_status = ThreatStatus.ON_COMBAT
+				if player_owner != unit.player_owner:
+					var sight_range = MELEE_SIGHT_RANGE_SQ if weapon == null else WEAPON_SIGHT_RANGE_SQ
+					if global_position.distance_squared_to(unit.global_position) <= sight_range:
+						list.append(unit)
+						threats.append(0)
+						unit.attacker_pos[self] = list.size() - 1
+						t_status = ThreatStatus.ON_COMBAT
 		elif t_status == ThreatStatus.ON_COMBAT:
 			t_time += UPDATE_INTERVAL
 			if global_position.distance_squared_to(return_position) <= RETURN_RANGE_SQ and list[0] != null:

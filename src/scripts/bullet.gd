@@ -16,7 +16,6 @@ func _physics_process(delta: float) -> void:
 	global_position += direction * speed * delta
 
 func _on_area_entered(area: Area3D) -> void:
-	print("tree hitted")
 	queue_free()
 
 func _on_body_entered(body: Node3D) -> void:
